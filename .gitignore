@@ -23,3 +23,6 @@ application-secret.properties
 # Docker / logs
 *.log
 logs/
+.metadata/
+**/target/
+**/.factorypath
