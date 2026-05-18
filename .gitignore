@@ -26,3 +26,6 @@ logs/
 .metadata/
 **/target/
 **/.factorypath
+.metadata/
+**/target/
+**/.factorypath
