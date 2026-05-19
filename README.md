@@ -1,139 +1,178 @@
 # NUM Lost & Found Service Platform
 
-## 1. Төслийн танилцуулга
+## 1. Төслийн товч танилцуулга
 
-**NUM Lost & Found Service Platform** нь МУИС-ийн орчинд алдагдсан болон олдсон эд зүйлсийг бүртгэх, зураг хавсаргах, боломжит тохирлыг автоматаар хайх, буцаан авах хүсэлтийг удирдах зориулалттай **Service-Oriented Architecture / microservice** суурьтай систем юм.
+**NUM Lost & Found Service Platform** нь МУИС-ийн орчинд алдагдсан болон олдсон эд зүйлсийг бүртгэх, зураг хавсаргах, боломжит тохирлыг автоматаар санал болгох, буцаан авах хүсэлтийг удирдах зориулалттай service-oriented / microservice суурьтай веб систем юм.
 
-Энэхүү төсөл нь нэг том application хэлбэрээр биш, харин тусдаа үүрэгтэй хэд хэдэн service-ээс бүрдсэн. Frontend нь backend service-үүдтэй шууд холбогдохгүй, бүх хүсэлтээ **API Gateway**-ээр дамжуулдаг. Ингэснээр системийн бүтэц илүү цэгцтэй, өргөтгөх боломжтой, service бүрийн үүрэг тодорхой болсон.
+Энэхүү систем нь frontend application, API Gateway болон тусдаа үүрэгтэй backend service-үүдээс бүрдэнэ. Хэрэглэгч frontend-ээр дамжуулан системтэй харилцах бөгөөд frontend нь бүх backend service рүү шууд хандахгүй, зөвхөн API Gateway рүү request илгээдэг.
+
+---
 
 ## 2. Төслийн зорилго
 
-Энэхүү төслийн гол зорилго нь SOA хичээлийн хүрээнд бодит хэрэглээтэй, service-үүдийн хоорондын харилцааг харуулсан систем хөгжүүлэх явдал юм.
+Энэхүү төслийн гол зорилго нь алдагдсан болон олдсон эд зүйлсийн бүртгэл, тохирол, буцаан авах хүсэлтийг нэг системээр удирдах боломжтой платформ боловсруулах явдал юм.
 
-Төслийн үндсэн зорилтууд:
+Үндсэн зорилтууд:
 
-- Алдагдсан эд зүйл бүртгэх
-- Олдсон эд зүйл бүртгэх
-- Эд зүйл бүрт зураг upload хийх
-- Алдагдсан болон олдсон эд зүйлсийг автоматаар харьцуулж боломжит тохирол санал болгох
-- Буцаан авах хүсэлт үүсгэх
-- Claim хүсэлтийг approve / reject хийх
-- Login / register бүхий хэрэглэгчийн нэвтрэлтийн урсгал нэмэх
-- API Gateway ашиглан service-үүдийг нэг цэгээр дамжуулж ажиллуулах
-- Docker Compose ашиглан олон service-ийг нэг дор ажиллуулах
+- Хэрэглэгч бүртгүүлэх болон нэвтрэх боломжтой байх
+- Алдагдсан болон олдсон эд зүйл бүртгэх
+- Эд зүйл бүрт зураг хавсаргах
+- Алдагдсан эд зүйлд тохирох боломжит олдсон эд зүйлсийг санал болгох
+- Буцаан авах claim request үүсгэх
+- Claim request-ийг батлах эсвэл татгалзах
+- PostgreSQL database service ашиглан өгөгдлийг хадгалах
+- Docker Compose ашиглан бүх service-ийг нэг дор ажиллуулах
+
+---
 
 ## 3. Ашигласан технологи
 
-| Төрөл | Технологи |
-|---|---|
-| Backend | Java 21, Spring Boot 3.3.5 |
-| API Gateway | Spring Cloud Gateway |
-| Frontend | React, Vite, Axios |
-| Database | H2 in-memory database |
-| File Upload | Spring Multipart File Upload |
-| Containerization | Docker, Docker Compose |
-| Build Tool | Maven |
-| Deployment бэлтгэл | Dockerfile, docker-compose.prod.yml |
-| Version Control | Git, GitHub |
+### Backend
+
+- Java 21
+- Spring Boot 3.3.5
+- Spring Web
+- Spring Data JPA
+- Spring Cloud Gateway
+- Maven
+
+### Frontend
+
+- React
+- Vite
+- Axios
+- CSS
+
+### Database ба storage
+
+- PostgreSQL 16
+- Docker Volume
+- File upload storage volume
+
+### DevOps / Runtime
+
+- Docker
+- Docker Compose
+- Git / GitHub
+
+---
 
 ## 4. Системийн архитектур
 
+Систем нь дараах үндсэн хэсгүүдээс бүрдэнэ.
+
 ```text
 React Frontend
-      |
-      v
+      ↓
 API Gateway
-      |
-      +--> Auth Service
-      +--> Item Service
-      +--> Matching Service
-      +--> Claim Service
-      +--> File Service
+      ↓
+Auth Service
+Item Service
+Matching Service
+Claim Service
+File Service
+      ↓
+PostgreSQL Database Service
 ```
 
-## 5. Service-үүдийн үүрэг
+Frontend нь зөвхөн API Gateway-тэй холбогдоно. API Gateway нь ирсэн request-ийн path-аас хамааран тохирох backend service рүү дамжуулна.
+
+---
+
+## 5. Service-үүдийн тайлбар
 
 ### 5.1 API Gateway
 
-**API Gateway** нь frontend болон backend service-үүдийн хоорондын гол нэвтрэх цэг юм. Frontend зөвхөн API Gateway рүү request илгээнэ. Gateway нь request-ийн path-аас хамаарч зөв service рүү дамжуулна.
+**API Gateway** нь frontend болон backend service-үүдийн хоорондох төв оролтын цэг юм.
+
+Үүрэг:
+
+- Frontend request-ийг хүлээн авах
+- Path-based routing хийх
+- Service-үүдийн URL-ийг frontend-ээс нуух
+- CORS тохиргоог төвлөрүүлэх
 
 Route-ууд:
 
 ```text
-/api/auth/**     -> Auth Service
-/api/items/**    -> Item Service
-/api/matches/**  -> Matching Service
-/api/claims/**   -> Claim Service
-/api/files/**    -> File Service
+/api/auth/**     → Auth Service
+/api/items/**    → Item Service
+/api/matches/**  → Matching Service
+/api/claims/**   → Claim Service
+/api/files/**    → File Service
 ```
 
-API Gateway ашигласнаар frontend олон service-ийн port болон URL мэдэх шаардлагагүй болсон.
+---
 
 ### 5.2 Auth Service
 
 **Auth Service** нь хэрэглэгчийн бүртгэл болон нэвтрэлтийг хариуцна.
 
-Үндсэн боломжууд:
+Үүрэг:
 
-- User register
-- User login
-- Password hashing
-- User response болон demo token буцаах
-- Login хийгээгүй хэрэглэгчийг dashboard руу оруулахгүй байх flow-г дэмжих
+- Register хийх
+- Login хийх
+- Password hash хийж хадгалах
+- User response/token буцаах
+
+Database:
+
+- PostgreSQL database service дээр user account мэдээлэл хадгална.
+
+---
 
 ### 5.3 Item Service
 
-**Item Service** нь алдагдсан болон олдсон эд зүйлсийг бүртгэх, хадгалах, жагсаах, төлөв өөрчлөх үүрэгтэй.
+**Item Service** нь lost/found item-ийн үндсэн бүртгэлийг хариуцна.
 
-Item object-ийн гол field-үүд:
+Үүрэг:
+
+- Алдагдсан эд зүйл бүртгэх
+- Олдсон эд зүйл бүртгэх
+- Бүх item жагсаах
+- Item-ийг type-аар шүүх
+- Item status update хийх
+
+Item status:
 
 ```text
-id
-title
-description
-category
-location
-imageUrl
-type: LOST / FOUND
-status: OPEN / MATCHED / CLAIMED / CLOSED
-contactName
-contactEmail
-createdAt
+OPEN
+MATCHED
+CLAIMED
+CLOSED
 ```
 
-Claim батлагдсаны дараа тухайн lost болон found item-ийн status нь `CLAIMED` болж өөрчлөгдөнө.
+Database:
+
+- PostgreSQL database service дээр item мэдээлэл хадгална.
+
+---
 
 ### 5.4 Matching Service
 
-**Matching Service** нь алдагдсан эд зүйлд тохирох боломжит олдсон эд зүйлсийг санал болгодог.
+**Matching Service** нь алдагдсан эд зүйлд тохирох олдсон эд зүйлсийг хайж санал болгоно.
 
-Matching logic нь дараах мэдээллийг харьцуулна.
+Үүрэг:
 
-- Category ижил эсэх
-- Location ижил эсэх
-- Title төстэй эсэх
-- Description төстэй эсэх
+- Lost item-ийн мэдээллийг авах
+- Found item-үүдтэй харьцуулах
+- Category, location, title, description зэрэг мэдээллээр score тооцох
+- Боломжит match result буцаах
 
-Үр дүнд нь score болон тайлбар буцаана.
+Matching Service өөрөө database хадгалахгүй. Item Service-ээс өгөгдөл авч тохирол тооцдог.
 
-Жишээ response:
-
-```json
-[
-  {
-    "lostItemId": 1,
-    "foundItemId": 2,
-    "lostItemTitle": "Black Wallet",
-    "foundItemTitle": "Black Wallet Found",
-    "score": 95,
-    "reason": "Matched by same category, same location, similar title, similar description. Score: 95"
-  }
-]
-```
+---
 
 ### 5.5 Claim Service
 
-**Claim Service** нь хэрэглэгч буцаан авах хүсэлт үүсгэх, claim-ийн төлөв удирдах үүрэгтэй.
+**Claim Service** нь буцаан авах хүсэлтийн workflow-г хариуцна.
+
+Үүрэг:
+
+- Claim request үүсгэх
+- Claim жагсаах
+- Claim status update хийх
+- Claim approve/reject хийх
 
 Claim status:
 
@@ -143,96 +182,134 @@ APPROVED
 REJECTED
 ```
 
-Claim approve хийх үед frontend нь Item Service рүү хүсэлт илгээж, холбогдох lost болон found item-үүдийг `CLAIMED` төлөвтэй болгодог. Ингэснээр dashboard дээр зөвхөн `OPEN` item-үүд харагдана.
+Claim approve болсон үед холбогдох lost болон found item-үүд `CLAIMED` төлөвтэй болно. Frontend дээр зөвхөн `OPEN` item-үүд харагддаг тул claim болсон item жагсаалтаас алга болно.
+
+Database:
+
+- PostgreSQL database service дээр claim мэдээлэл хадгална.
+
+---
 
 ### 5.6 File Service
 
-**File Service** нь зураг upload хийх, хадгалах, image URL буцаах үүрэгтэй.
+**File Service** нь зураг upload болон зураг serve хийх үүрэгтэй.
 
-Flow:
+Үүрэг:
 
-```text
-Frontend зураг сонгоно
-      |
-      v
-/api/files/upload
-      |
-      v
-File Service зураг хадгална
-      |
-      v
-/api/files/{fileName} URL буцаана
-      |
-      v
-Item Service imageUrl field дээр хадгална
-```
-
-Upload хийсэн зураг Docker volume-д хадгалагдана.
-
-## 6. Гол боломжууд
-
-- Login/Register page
-- Login хийгээгүй хэрэглэгч dashboard харах боломжгүй
-- Lost item бүртгэх
-- Found item бүртгэх
 - Зураг upload хийх
-- Item card дээр зураг харуулах
-- Location dropdown
-- Category dropdown
-- Smart matching
-- Claim request үүсгэх
-- Claim approve/reject хийх
-- Approve хийсний дараа item status `CLAIMED` болох
-- API Gateway-ээр бүх request route хийх
-- Docker Compose ашиглан олон service нэг дор ажиллуулах
+- Upload хийсэн image URL буцаах
+- Item-д хадгалагдсан image URL-аар зураг харуулах
 
-## 7. Local ажиллуулах заавар
+File Service нь PostgreSQL database ашиглахгүй. Зургууд Docker volume дээр хадгалагдана.
 
-### 7.1 Шаардлагатай зүйлс
+---
 
-Доорх tools суусан байх шаардлагатай.
+### 5.7 PostgreSQL Database Service
+
+PostgreSQL нь тусдаа Docker service хэлбэрээр ажиллана.
 
 ```text
-Java 21
-Maven
-Node.js
-npm
-Docker Desktop
-Git
+postgres-db
 ```
 
-### 7.2 Backend service-үүдийг Docker Compose ашиглан асаах
+Энэ нь business microservice биш, харин infrastructure service юм. Auth Service, Item Service, Claim Service нь энэ database service-тэй холбогдож өгөгдлөө хадгалдаг.
 
-Project root folder руу орно.
+Database-ийн өгөгдөл Docker volume дээр хадгалагддаг.
+
+```yaml
+volumes:
+  postgres-data:
+```
+
+Иймээс:
+
+```bash
+docker compose down
+docker compose up
+```
+
+хийсэн ч өгөгдөл хадгалагдана.
+
+Харин:
+
+```bash
+docker compose down -v
+```
+
+хийвэл volume устах тул database-ийн өгөгдөл устна.
+
+---
+
+## 6. Docker Compose бүтэц
+
+Local development болон demo орчинд бүх service-ийг Docker Compose ашиглан нэг дор ажиллуулна.
+
+Үндсэн container-ууд:
+
+```text
+num-postgres-db
+num-auth-service
+num-item-service
+num-matching-service
+num-claim-service
+num-file-service
+num-api-gateway
+```
+
+Frontend нь development үед local npm dev server дээр ажиллана.
+
+```text
+http://localhost:5173
+```
+
+Backend API Gateway:
+
+```text
+http://localhost:8080
+```
+
+---
+
+## 7. Port тохиргоо
+
+| Service | Port | Тайлбар |
+|---|---:|---|
+| API Gateway | 8080 | Frontend-ийн үндсэн backend entry point |
+| Auth Service | 8081 | Login/Register |
+| Item Service | 8082 | Lost/Found item |
+| Matching Service | 8083 | Smart matching |
+| Claim Service | 8084 | Claim workflow |
+| File Service | 8085 | File upload |
+| PostgreSQL | 5432 | Database service |
+| React Frontend | 5173 | Frontend development server |
+
+---
+
+## 8. Project ажиллуулах заавар
+
+### 8.1 Backend service-үүдийг асаах
+
+Project root folder дээр:
 
 ```bash
 cd ~/Desktop/num-lost-found-platform
-```
-
-Docker Compose ажиллуулах:
-
-```bash
 docker compose up --build
 ```
 
-Backend service-үүд дараах port дээр ажиллана.
+Бүх container ажиллаж байгаа эсэхийг шалгах:
 
-| Service | Port |
-|---|---|
-| API Gateway | 8080 |
-| Auth Service | 8081 |
-| Item Service | 8082 |
-| Matching Service | 8083 |
-| Claim Service | 8084 |
-| File Service | 8085 |
+```bash
+docker compose ps
+```
 
-### 7.3 Frontend ажиллуулах
+---
+
+### 8.2 Frontend асаах
 
 Шинэ terminal нээгээд:
 
 ```bash
 cd ~/Desktop/num-lost-found-platform/frontend-app
-npm install
 npm run dev
 ```
 
@@ -242,66 +319,39 @@ Browser дээр:
 http://localhost:5173
 ```
 
-нээнэ.
+---
 
-Хэрвээ 5173 port ашиглагдаж байвал Vite өөр port өгч болно. Жишээ нь:
+## 9. API шалгах command-ууд
 
-```text
-http://localhost:5174
-```
-
-## 8. API endpoint жагсаалт
-
-### 8.1 Auth Service
-
-| Method | Endpoint | Үүрэг |
-|---|---|---|
-| POST | `/api/auth/register` | Шинэ хэрэглэгч бүртгэх |
-| POST | `/api/auth/login` | Хэрэглэгч login хийх |
-| GET | `/api/auth/ping` | Auth service ажиллаж байгаа эсэх шалгах |
-
-### 8.2 Item Service
-
-| Method | Endpoint | Үүрэг |
-|---|---|---|
-| POST | `/api/items` | Lost/Found item үүсгэх |
-| GET | `/api/items` | Бүх item авах |
-| GET | `/api/items/{id}` | Нэг item авах |
-| GET | `/api/items/lost` | Lost item-үүд авах |
-| GET | `/api/items/found` | Found item-үүд авах |
-| PATCH | `/api/items/{id}/status/{status}` | Item status өөрчлөх |
-
-### 8.3 Matching Service
-
-| Method | Endpoint | Үүрэг |
-|---|---|---|
-| GET | `/api/matches/lost/{lostItemId}` | Lost item-д тохирох found item хайх |
-
-### 8.4 Claim Service
-
-| Method | Endpoint | Үүрэг |
-|---|---|---|
-| POST | `/api/claims` | Claim request үүсгэх |
-| GET | `/api/claims` | Бүх claim авах |
-| PATCH | `/api/claims/{id}/status/{status}` | Claim status update хийх |
-
-### 8.5 File Service
-
-| Method | Endpoint | Үүрэг |
-|---|---|---|
-| POST | `/api/files/upload` | Зураг upload хийх |
-| GET | `/api/files/{fileName}` | Upload хийсэн зураг авах |
-
-## 9. Test хийх жишээ command-ууд
-
-### 9.1 Service health шалгах
+API Gateway health check:
 
 ```bash
 curl http://localhost:8080/actuator/health
+```
+
+Auth Service ping:
+
+```bash
 curl http://localhost:8080/api/auth/ping
 ```
 
-### 9.2 Register хийх
+Items жагсаах:
+
+```bash
+curl http://localhost:8080/api/items
+```
+
+Claims жагсаах:
+
+```bash
+curl http://localhost:8080/api/claims
+```
+
+---
+
+## 10. Жишээ API request
+
+### 10.1 Register
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/register \
@@ -313,7 +363,7 @@ curl -X POST http://localhost:8080/api/auth/register \
   }'
 ```
 
-### 9.3 Login хийх
+### 10.2 Login
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
@@ -324,7 +374,7 @@ curl -X POST http://localhost:8080/api/auth/login \
   }'
 ```
 
-### 9.4 Lost item үүсгэх
+### 10.3 Lost item үүсгэх
 
 ```bash
 curl -X POST http://localhost:8080/api/items \
@@ -332,8 +382,8 @@ curl -X POST http://localhost:8080/api/items \
   -d '{
     "title": "Black Wallet",
     "description": "Lost black wallet near NUM library",
-    "category": "Түрийвч",
-    "location": "МУИС Номын сан",
+    "category": "Wallet",
+    "location": "NUM Library",
     "type": "LOST",
     "contactName": "Javzaa",
     "contactEmail": "javzato@gmail.com",
@@ -341,16 +391,16 @@ curl -X POST http://localhost:8080/api/items \
   }'
 ```
 
-### 9.5 Found item үүсгэх
+### 10.4 Found item үүсгэх
 
 ```bash
 curl -X POST http://localhost:8080/api/items \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Black Wallet Found",
-    "description": "Found black wallet near NUM library entrance",
-    "category": "Түрийвч",
-    "location": "МУИС Номын сан",
+    "description": "Found a black wallet near NUM library entrance",
+    "category": "Wallet",
+    "location": "NUM Library",
     "type": "FOUND",
     "contactName": "Student Office",
     "contactEmail": "office@num.edu.mn",
@@ -358,13 +408,13 @@ curl -X POST http://localhost:8080/api/items \
   }'
 ```
 
-### 9.6 Matching шалгах
+### 10.5 Match хайх
 
 ```bash
 curl http://localhost:8080/api/matches/lost/1
 ```
 
-### 9.7 Claim үүсгэх
+### 10.6 Claim үүсгэх
 
 ```bash
 curl -X POST http://localhost:8080/api/claims \
@@ -374,131 +424,92 @@ curl -X POST http://localhost:8080/api/claims \
     "foundItemId": 2,
     "claimantName": "Javzaa",
     "claimantEmail": "javzato@gmail.com",
-    "proofDescription": "Энэ түрийвчин дотор миний оюутны үнэмлэх болон банкны карт байгаа."
+    "proofDescription": "Wallet has my student ID card and bank card inside."
   }'
 ```
 
-### 9.8 Claim approve хийх
+### 10.7 Claim approve хийх
 
 ```bash
 curl -X PATCH http://localhost:8080/api/claims/1/status/APPROVED
 ```
 
-## 10. Docker Compose бүтэц
+---
 
-Local `docker-compose.yml` нь backend service-үүдийг нэг Docker network дээр ажиллуулна.
+## 11. Demo workflow
 
-Үндсэн санаа:
+Demo хийх дараалал:
 
-```text
-api-gateway -> auth-service
-api-gateway -> item-service
-api-gateway -> matching-service
-api-gateway -> claim-service
-api-gateway -> file-service
-matching-service -> item-service
-```
-
-File upload-д зориулсан volume:
-
-```text
-file-uploads:/app/uploads
-```
-
-Production deployment-д зориулан нэмэлтээр `docker-compose.prod.yml` бэлдсэн. Энэ file нь frontend-ийг Nginx ашиглан port 80 дээр serve хийх зориулалттай.
-
-## 11. Demo хийх дараалал
-
-Багшид үзүүлэх demo flow:
-
-1. Login/Register page харуулах
-2. Шинэ хэрэглэгч register хийх
-3. Dashboard руу орж байгааг харуулах
+1. Frontend login/register page харуулах
+2. Шинэ хэрэглэгч бүртгэх
+3. Dashboard руу нэвтрэх
 4. Lost item зурагтай бүртгэх
 5. Found item зурагтай бүртгэх
-6. Smart Matching хэсэгт lost item сонгож тохирол хайх
+6. Smart Matching хэсэгт тохирол хайх
 7. Claim request үүсгэх
 8. Claim approve хийх
-9. Claim шийдвэрлэгдсэн гэж харагдах
-10. Approved болсон item-үүд OPEN list-ээс алга болж байгааг харуулах
+9. Claim approved болсон item-үүд `CLAIMED` төлөвтэй болж, OPEN list-ээс алга болж байгааг харуулах
+10. Docker Compose restart хийсэн ч өгөгдөл хадгалагдаж байгааг харуулах
 
-## 12. SOA зарчмын тайлбар
+---
 
-Энэхүү төсөл нь SOA-ийн дараах санаануудыг хэрэгжүүлсэн.
+## 12. Өгөгдөл хадгалалт ба persistence
 
-### 12.1 Service separation
+Эхний demo хувилбарт H2 in-memory database ашиглаж байсан. Харин одоогийн хувилбарт PostgreSQL database service ашиглаж байна.
 
-Системийн том functionality-г тусдаа service-үүдэд хуваасан.
+PostgreSQL service нь Docker volume ашигладаг:
 
 ```text
-Auth
-Item
-Matching
-Claim
-File
-Gateway
+postgres-data
 ```
 
-### 12.2 Loose coupling
+Тиймээс container restart/down хийсэн ч user, item, claim мэдээлэл хадгалагдана.
 
-Frontend нь service бүрийн дотоод implementation-г мэдэхгүй. Frontend зөвхөн API Gateway-тэй харилцана.
+Data хадгалагдана:
 
-### 12.3 Reusability
+```bash
+docker compose down
+docker compose up
+```
 
-File Service, Auth Service, Matching Service зэрэг нь цаашид өөр системд дахин ашиглагдах боломжтой.
+Data устна:
 
-### 12.4 Independent deployment
+```bash
+docker compose down -v
+```
 
-Service бүр Dockerfile-той. Иймээс тус бүрийг тусад нь build/deploy хийх боломжтой.
+---
 
-### 12.5 API-based communication
+## 13. Төслийн давуу тал
 
-Service-үүд REST API ашиглан хоорондоо харилцаж байна.
+- Microservice architecture ашигласан
+- API Gateway ашиглан backend service-үүдийг нэг entry point-той болгосон
+- Service бүр тусдаа үүрэгтэй
+- PostgreSQL database service ашиглан persistent data storage хийсэн
+- File upload тусдаа service болсон
+- Docker Compose ашиглан бүх service-ийг нэг дор ажиллуулах боломжтой
+- Frontend нь хэрэглэгчдэд ойлгомжтой dashboard хэлбэртэй
+- Claim workflow болон item status transition хэрэгжсэн
 
-## 13. Cloud deployment бэлтгэл
+---
 
-Cloud deployment-д зориулж дараах зүйлсийг бэлдсэн.
+## 14. Хязгаарлалт ба цаашдын сайжруулалт
 
-- Backend service бүрийн Dockerfile
-- Frontend production Dockerfile
-- `docker-compose.prod.yml`
-- API Gateway CORS environment тохиргоо
-- Frontend `VITE_API_BASE_URL` environment тохиргоо
-- DigitalOcean Droplet дээр Docker build туршилт
+Одоогийн хувилбар нь demo болон хичээлийн project-д зориулагдсан. Цаашид дараах байдлаар сайжруулах боломжтой.
 
-Final demo-г local Docker Compose хувилбараар үзүүлж болно. Cloud deployment нь production compose file ашиглан үргэлжлүүлэх боломжтой.
-
-## 14. Төслийн давуу тал
-
-- Бодит хэрэгцээтэй campus service санаа
-- Service бүрийн үүрэг тодорхой
-- API Gateway ашигласан
-- Login/Register authentication flow нэмсэн
-- File upload service нэмсэн
-- Matching algorithm-той
-- Claim workflow-тэй
-- Docker Compose ашигласан
-- Frontend Монгол хэлтэй, demo хийхэд ойлгомжтой
-- Cloud deployment-д бэлэн бүтэцтэй
-
-## 15. Ирээдүйн сайжруулалт
-
-Цаашид дараах байдлаар сайжруулах боломжтой.
-
-- H2 database-г PostgreSQL болгох
 - JWT authentication бүрэн хэрэгжүүлэх
-- Role-based access control нэмэх
-- Admin dashboard хийх
+- User role буюу admin/user permission нэмэх
+- PostgreSQL schema-г service бүрээр салгах
+- Image storage-ийг cloud object storage рүү шилжүүлэх
+- Search/filter function нэмэх
 - Notification service нэмэх
-- Email notification илгээх
-- DigitalOcean Spaces эсвэл S3 storage ашиглах
-- Matching algorithm-г илүү ухаалаг болгох
-- Item search/filter нэмэх
-- Claim history page нэмэх
-- HTTPS болон domain name тохируулах
+- Unit болон integration test нэмэх
+- Cloud deployment-ийг production түвшинд бүрэн тохируулах
 
-## 16. Дүгнэлт
+---
 
-NUM Lost & Found Service Platform нь SOA/microservice architecture-ийн үндсэн ойлголтуудыг бодит систем дээр хэрэгжүүлсэн project юм. Систем нь authentication, item management, smart matching, claim workflow, file upload зэрэг тусдаа service-үүдээс бүрдэж, API Gateway-ээр дамжуулан frontend-тэй холбогддог.
+## 15. Дүгнэлт
 
-Энэхүү project нь зөвхөн CRUD систем биш, харин service separation, API routing, file handling, workflow management, containerization зэрэг олон ойлголтыг нэгтгэсэн практик ажил болсон.
+NUM Lost & Found Service Platform нь алдагдсан болон олдсон эд зүйлсийн бүртгэл, тохирол, claim workflow-г microservice architecture ашиглан хэрэгжүүлсэн систем юм. Системд Auth, Item, Matching, Claim, File service болон API Gateway ашигласан. Мөн PostgreSQL database service-ийг Docker Compose дээр тусдаа infrastructure service хэлбэрээр ажиллуулж, өгөгдлийг persistent volume дээр хадгалдаг болгосон.
+
+Энэхүү төсөл нь service-oriented architecture, API Gateway routing, Docker Compose orchestration, persistent database service, frontend-backend integration зэрэг үндсэн ойлголтуудыг нэгтгэн харуулж байна.
