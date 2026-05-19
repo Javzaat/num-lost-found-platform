@@ -1,4 +1,17 @@
 services:
+  postgres-db:
+    image: postgres:16
+    container_name: num-postgres-db
+    environment:
+      - POSTGRES_USER=num_user
+      - POSTGRES_PASSWORD=num_password
+      - POSTGRES_DB=num_lost_found
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
   auth-service:
     build: ./auth-service
     container_name: num-auth-service
@@ -6,6 +19,12 @@ services:
       - "8081:8081"
     environment:
       - SERVER_PORT=8081
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/num_lost_found
+      - SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
+      - SPRING_DATASOURCE_USERNAME=num_user
+      - SPRING_DATASOURCE_PASSWORD=num_password
+    depends_on:
+      - postgres-db
 
   item-service:
     build: ./item-service
@@ -14,6 +33,12 @@ services:
       - "8082:8082"
     environment:
       - SERVER_PORT=8082
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/num_lost_found
+      - SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
+      - SPRING_DATASOURCE_USERNAME=num_user
+      - SPRING_DATASOURCE_PASSWORD=num_password
+    depends_on:
+      - postgres-db
 
   matching-service:
     build: ./matching-service
@@ -33,7 +58,12 @@ services:
       - "8084:8084"
     environment:
       - SERVER_PORT=8084
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/num_lost_found
+      - SPRING_DATASOURCE_DRIVER=org.postgresql.Driver
+      - SPRING_DATASOURCE_USERNAME=num_user
+      - SPRING_DATASOURCE_PASSWORD=num_password
     depends_on:
+      - postgres-db
       - item-service
       - matching-service
 
@@ -68,4 +98,5 @@ services:
       - file-service
 
 volumes:
+  postgres-data:
   file-uploads:
